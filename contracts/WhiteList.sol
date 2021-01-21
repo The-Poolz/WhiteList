@@ -39,9 +39,9 @@ contract WhiteList {
         uint256 _ChangeUntil,
         uint256 _Limit,
         address _Contract
-    ) public returns (uint256 Id) {
+    ) public payable returns (uint256 Id) {
         require(msg.value >= WhiteListCost);
-        WhitelistSettings[WhiteListCount] = new WhiteListItem(
+        WhitelistSettings[WhiteListCount] =  WhiteListItem(
             /*_Limit == 0 ? uint256(-1) :*/
             _Limit,
             msg.sender,
@@ -86,7 +86,7 @@ contract WhiteList {
             WhitelistDB[_Id][_Subject] >= _Amount,
             "Sorry, no alocation for Subject"
         );
-        uint256 temp = WhitelistDB[_Id][_Subject].Limit - _Amount;
-        WhitelistDB[_Id][_Subject].Limit = temp;
+        uint256 temp = WhitelistDB[_Id][_Subject] - _Amount;
+        WhitelistDB[_Id][_Subject] = temp;
     }
 }
