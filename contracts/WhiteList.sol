@@ -6,7 +6,7 @@ contract WhiteList {
         WhiteListCount = 3; //0 is off, 1 is MainCoin, 2 is TokenFilter
     }
 
-    modifier OnlyCreator(_Id) {
+    modifier OnlyCreator(uint256 _Id) {
         require(
             WhitelistSettings[_Id].Creator == msg.sender,
             "Only creator can add"
@@ -53,14 +53,14 @@ contract WhiteList {
         return temp;
     }
 
-    function AddAddress(uint256 _Id, address[] _Users) public OnlyCreator {
-        for (var index = 0; index < _Users.length; index++) {
+    function AddAddress(uint256 _Id, address[] _Users) public OnlyCreator(_Id) {
+        for (uint256 index = 0; index < _Users.length; index++) {
             _AddAddress(_Id, _Users[index]);
         }
     }
 
-    function RemoveAddress(uint256 _Id, address[] _Users) public OnlyCreator {
-        for (var index = 0; index < _Users.length; index++) {
+    function RemoveAddress(uint256 _Id, address[] _Users) public OnlyCreator(_Id) {
+        for (uint256 index = 0; index < _Users.length; index++) {
             _RemoveAddress(_Id, _Users[index]);
         }
     }
