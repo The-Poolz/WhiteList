@@ -1,76 +1,86 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.4.26;
 
-contract WhiteList {
+import "./WhiteListHelper.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
+contract WhiteList is WhiteListHelper, Ownable{
     constructor() public {
-        WhiteListCount = 3; //0 is off, 1 is MainCoin, 2 is TokenFilter
+        WhiteListCount = 1; //0 is off
+        MaxUsersLimit = 10;
     }
 
-    modifier OnlyCreator(uint256 _Id) {
-        require(
-            WhitelistSettings[_Id].Creator == msg.sender,
-            "Only creator can add"
-        );
-        require(
-            now < WhitelistSettings[_Id].ChangeUntil,
-            "Time for edit is finished"
-        );
-        require(_Id < WhiteListCount, "Wrong ID");
+    //uint256 public SignUpCost;
+    uint256 public MaxUsersLimit;
+
+    modifier isBelowUserLimit(uint256 _limit) {
+        require(_limit <= MaxUsersLimit, "Maximum User Limit exceeded");
         _;
     }
 
-    struct WhiteListItem {
-        uint256 Limit;
-        address Creator;
-        uint256 ChangeUntil;
-        //uint256 DrawLimit;
-        //uint256 SignUpPrice;
-        address Contract;
+    function setMaxUsersLimit(uint256 _limit) external onlyOwner {
+        MaxUsersLimit = _limit;
     }
-
-    mapping(uint256 => mapping(address => uint256)) public WhitelistDB;
-    mapping(uint256 => WhiteListItem) public WhitelistSettings;
-    uint256 public WhiteListCost;
-    uint256 public WhiteListCount;
-
-    //uint256 public SignUpCost;
 
     function CreateManualWhiteList(
         uint256 _ChangeUntil,
-        uint256 _Limit,
         address _Contract
     ) public payable returns (uint256 Id) {
         require(msg.value >= WhiteListCost);
         WhitelistSettings[WhiteListCount] =  WhiteListItem(
             /*_Limit == 0 ? uint256(-1) :*/
-            _Limit,
+            // _Limit,
             msg.sender,
             _ChangeUntil,
             _Contract
         );
         uint256 temp = WhiteListCount;
         WhiteListCount++;
+        emit NewWhiteList(temp, msg.sender, _Contract, _ChangeUntil);
         return temp;
     }
 
-    function AddAddress(uint256 _Id, address[] _Users) public OnlyCreator(_Id) {
+    function ChangeCreator(uint256 _Id, address _NewCreator)
+        external
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+    {
+        WhitelistSettings[_Id].Creator = _NewCreator;
+    }
+
+    function ChangeContract(uint256 _Id, address _NewContract)
+        external
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+    {
+        WhitelistSettings[_Id].Contract = _NewContract;
+    }
+
+    function AddAddress(uint256 _Id, address[] _Users, uint256[] _Amount)
+        public
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+        isBelowUserLimit(_Users.length)
+    {
+        require(_Users.length == _Amount.length, "Number of users should be same as the amount length");
         for (uint256 index = 0; index < _Users.length; index++) {
-            _AddAddress(_Id, _Users[index]);
+            _AddAddress(_Id, _Users[index], _Amount[index]);
         }
     }
 
-    function RemoveAddress(uint256 _Id, address[] _Users) public OnlyCreator(_Id) {
+    function RemoveAddress(uint256 _Id, address[] _Users)
+        public
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+        isBelowUserLimit(_Users.length)
+    {
         for (uint256 index = 0; index < _Users.length; index++) {
             _RemoveAddress(_Id, _Users[index]);
         }
-    }
-
-    function _AddAddress(uint256 _Id, address user) internal {
-        WhitelistDB[_Id][user] = WhitelistSettings[_Id].Limit;
-    }
-
-    function _RemoveAddress(uint256 _Id, address user) internal {
-        WhitelistDB[_Id][user] = 0;
     }
 
     function Register(
@@ -78,6 +88,7 @@ contract WhiteList {
         uint256 _Id,
         uint256 _Amount
     ) external {
+        if (_Id == 0) return;
         require(
             msg.sender == WhitelistSettings[_Id].Contract,
             "Only the Contract can call this"
@@ -88,5 +99,6 @@ contract WhiteList {
         );
         uint256 temp = WhitelistDB[_Id][_Subject] - _Amount;
         WhitelistDB[_Id][_Subject] = temp;
+        require(WhitelistDB[_Id][_Subject] == temp);
     }
 }
