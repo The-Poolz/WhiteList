@@ -3,7 +3,7 @@ const { assert } = require('chai');
 const truffleAssert = require('truffle-assertions');
 
 contract( 'WhiteList Contract' , async accounts => {
-    let instance, fromAddress, id
+    let instance, fromAddress, id, userLimit = 10
 
     beforeEach(async () => {
         instance = await WhiteList.deployed()
@@ -39,12 +39,12 @@ contract( 'WhiteList Contract' , async accounts => {
     })
 
     it('reverts when array length of users and amounts is not equal', async () => {
-        const accountsArray = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
-        const amountArray = [100, 200, 300]
+        const accountsArray = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]] // array size - 5
+        const amountArray = [100, 200, 300] // array size - 3
         truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}))
     })
 
-    it('returns uint typecast of -1 when id is 0', async () => {
+    it('returns uint256(-1) when id is 0', async () => {
         const result = await instance.check(0, accounts[1])
         const hexValue = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         assert.equal(web3.utils.toHex(result), hexValue)
@@ -57,6 +57,38 @@ contract( 'WhiteList Contract' , async accounts => {
         assert.equal(result1, 0)
         const result2 = await instance.check(id, accounts[5])
         assert.equal(result2, 0)
+    })
+
+    it(`returns the value of MaxUsersLimit as ${userLimit}`, async () => {
+        const limit = await instance.MaxUsersLimit()
+        assert.equal(limit.toNumber(), userLimit)
+    })
+
+    it(`should not allow to add users more than ${userLimit}`, async () => {
+        // array size - 20
+        const accountsArray = [...accounts, ...accounts]
+        const amountArray = []
+        for(let i=0; i<20; i++){
+            amountArray.push(100)
+        }
+        truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}))        
+    })
+
+    it(`should not allow to remove users more than ${userLimit}`, async () => {
+        // array size - 20
+        const accountsArray = [...accounts, ...accounts]
+        const amountArray = []
+        for(let i=0; i<20; i++){
+            amountArray.push(100)
+        }
+        truffleAssert.reverts(instance.RemoveAddress(id, accountsArray, {from: fromAddress}))        
+    })
+
+    it('update user limit', async () => {
+        const newLimit = 15
+        await instance.setMaxUsersLimit(newLimit)
+        const result = await instance.MaxUsersLimit()
+        assert.equal(result, newLimit)
     })
 
 })
