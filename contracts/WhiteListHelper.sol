@@ -7,12 +7,20 @@ contract WhiteListHelper{
     modifier OnlyCreator(uint256 _Id) {
         require(
             WhitelistSettings[_Id].Creator == msg.sender,
-            "Only creator can add"
+            "Only creator can access"
         );
+        _;
+    }
+
+    modifier TimeRemaining(uint256 _Id){
         require(
             now < WhitelistSettings[_Id].ChangeUntil,
             "Time for edit is finished"
         );
+        _;
+    }
+
+    modifier ValidateId(uint256 _Id){
         require(_Id < WhiteListCount, "Wrong ID");
         _;
     }

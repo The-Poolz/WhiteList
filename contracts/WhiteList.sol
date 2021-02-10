@@ -40,14 +40,44 @@ contract WhiteList is WhiteListHelper, Ownable{
         return temp;
     }
 
-    function AddAddress(uint256 _Id, address[] _Users, uint256[] _Amount) public OnlyCreator(_Id) isBelowUserLimit(_Users.length) {
+    function ChangeCreator(uint256 _Id, address _NewCreator)
+        external
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+    {
+        WhitelistSettings[_Id].Creator = _NewCreator;
+    }
+
+    function ChangeContract(uint256 _Id, address _NewContract)
+        external
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+    {
+        WhitelistSettings[_Id].Contract = _NewContract;
+    }
+
+    function AddAddress(uint256 _Id, address[] _Users, uint256[] _Amount)
+        public
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+        isBelowUserLimit(_Users.length)
+    {
         require(_Users.length == _Amount.length, "Number of users should be same as the amount length");
         for (uint256 index = 0; index < _Users.length; index++) {
             _AddAddress(_Id, _Users[index], _Amount[index]);
         }
     }
 
-    function RemoveAddress(uint256 _Id, address[] _Users) public OnlyCreator(_Id) isBelowUserLimit(_Users.length) {
+    function RemoveAddress(uint256 _Id, address[] _Users)
+        public
+        OnlyCreator(_Id)
+        TimeRemaining(_Id)
+        ValidateId(_Id)
+        isBelowUserLimit(_Users.length)
+    {
         for (uint256 index = 0; index < _Users.length; index++) {
             _RemoveAddress(_Id, _Users[index]);
         }
@@ -72,15 +102,3 @@ contract WhiteList is WhiteListHelper, Ownable{
         require(WhitelistDB[_Id][_Subject] == temp);
     }
 }
-
-// limit 0 scenario
-// safemath
-// whitelistDB inside the struct
-// integrations
-// whitelistcost
-
-// add n
-// revert transaction after n
-// ownable for n
-// change creator and contract
-// tests for all above

@@ -1,15 +1,22 @@
 const WhiteList = artifacts.require('WhiteList')
 const { assert } = require('chai');
 const truffleAssert = require('truffle-assertions');
+const timeMachine = require('ganache-time-traveler');
 
 contract( 'WhiteList Contract' , async accounts => {
     let instance, fromAddress, id, userLimit = 10
 
-    beforeEach(async () => {
-        instance = await WhiteList.deployed()
+    before(async () => {
         fromAddress = accounts[0]
     })
 
+    beforeEach(async () => {
+        instance = await WhiteList.deployed()
+        // let snapshot = await timeMachine.takeSnapshot();
+        // snapshotId = snapshot['result'];
+    })
+
+    
     it('should create a new manual WhiteList', async () => {
         const now = Date.now() / 1000 // current timestamp in seconds
         const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
@@ -42,6 +49,27 @@ contract( 'WhiteList Contract' , async accounts => {
         const accountsArray = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]] // array size - 5
         const amountArray = [100, 200, 300] // array size - 3
         truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}))
+    })
+
+    it('reverts when called by non creator address', async () => {
+        const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
+        const amountArray = [100, 200, 300]
+        truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: accounts[1]}))
+    })
+
+    it('reverts when called invalid ID', async () => {
+        const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
+        const amountArray = [100, 200, 300]
+        truffleAssert.reverts(instance.AddAddress(100, accountsArray, amountArray, {from: fromAddress}))
+    })
+
+    it('revert after time is expired', async () => {
+        await timeMachine.advanceTimeAndBlock(3601);
+        const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
+        const amountArray = [100, 200, 300]
+        // await instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress})
+        truffleAssert.reverts(instance.AddAddress(100, accountsArray, amountArray, {from: fromAddress}))
+        await timeMachine.advanceTimeAndBlock(-3601);
     })
 
     it('returns uint256(-1) when id is 0', async () => {
@@ -89,6 +117,19 @@ contract( 'WhiteList Contract' , async accounts => {
         await instance.setMaxUsersLimit(newLimit)
         const result = await instance.MaxUsersLimit()
         assert.equal(result, newLimit)
+    })
+
+    it('change creator address', async () => {
+        await instance.ChangeCreator(id, accounts[1], {from: fromAddress})
+        fromAddress = accounts[1]
+        const result = await instance.WhitelistSettings(id)
+        assert.equal(result.Creator, accounts[1])
+    })
+
+    it('change contract address', async () => {
+        await instance.ChangeContract(id, accounts[8], {from: fromAddress})
+        const result = await instance.WhitelistSettings(id)
+        assert.equal(result.Contract, accounts[8])
     })
 
 })
