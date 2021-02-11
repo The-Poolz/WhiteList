@@ -5,6 +5,8 @@ const timeMachine = require('ganache-time-traveler');
 
 contract( 'WhiteList Contract' , async accounts => {
     let instance, fromAddress, id, userLimit = 10
+    let whiteListCost = web3.utils.toWei('0.01', 'ether')
+    let contractAddress = accounts[9] // random address for contract
 
     before(async () => {
         fromAddress = accounts[0]
@@ -20,13 +22,21 @@ contract( 'WhiteList Contract' , async accounts => {
     it('should create a new manual WhiteList', async () => {
         const now = Date.now() / 1000 // current timestamp in seconds
         const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
-        const contractAddress = accounts[9] // random address
-        const result = await instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress})
+        const value = whiteListCost
+        const result = await instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: value})
         const logs = result.logs[0].args
         id = logs._WhiteListCount.toNumber()
         assert.equal(logs._creator, fromAddress)
         assert.equal(logs._contract, contractAddress)
         assert.equal(logs._changeUntil, timestamp)
+    })
+
+    it('reverts when value is less than WhiteListCost', async () => {
+        const now = Date.now() / 1000 // current timestamp in seconds
+        const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
+        
+        const value = whiteListCost
+        truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}))
     })
 
     it('should add addresses to whitelist', async () => {
@@ -129,7 +139,38 @@ contract( 'WhiteList Contract' , async accounts => {
     it('change contract address', async () => {
         await instance.ChangeContract(id, accounts[8], {from: fromAddress})
         const result = await instance.WhitelistSettings(id)
-        assert.equal(result.Contract, accounts[8])
+        contractAddress = accounts[8]
+        assert.equal(result.Contract, contractAddress)
+    })
+
+    it('change WhiteListCost', async () => {
+        const newCost = web3.utils.toWei('0.02', 'ether')
+        await instance.setWhiteListCost(newCost)
+        const whiteListCost = await instance.WhiteListCost()
+        assert.equal(web3.utils.toHex(newCost), web3.utils.toHex(whiteListCost))
+    })
+
+    it('should register', async () => {
+        const userAddress = accounts[1]
+        const userLimit = await instance.check(id, userAddress)
+        const amount = 30
+        await instance.Register(id, userAddress, amount, {from: contractAddress})
+        const newUserLimit = await instance.check(id, userAddress)
+        assert.equal(newUserLimit, userLimit - amount)
+    })
+
+    it('register reverts when called by wrong contract', async () => {
+        const userAddress = accounts[1]
+        const userLimit = await instance.check(id, userAddress)
+        const amount = 30
+        truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: accounts[1]}))
+    })
+
+    it('register reverts when limit is less than amount', async () => {
+        const userAddress = accounts[1]
+        const userLimit = await instance.check(id, userAddress)
+        const amount = userLimit + 1
+        truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: contractAddress}))
     })
 
 })

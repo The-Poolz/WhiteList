@@ -8,6 +8,7 @@ contract WhiteList is WhiteListHelper, Ownable{
     constructor() public {
         WhiteListCount = 1; //0 is off
         MaxUsersLimit = 10;
+        WhiteListCost = 0.01 ether;
     }
 
     //uint256 public SignUpCost;
@@ -22,11 +23,15 @@ contract WhiteList is WhiteListHelper, Ownable{
         MaxUsersLimit = _limit;
     }
 
+    function setWhiteListCost(uint256 _newCost) external onlyOwner {
+        WhiteListCost = _newCost;
+    }
+
     function CreateManualWhiteList(
         uint256 _ChangeUntil,
         address _Contract
     ) public payable returns (uint256 Id) {
-        require(msg.value >= WhiteListCost);
+        require(msg.value >= WhiteListCost, "ether not enough");
         WhitelistSettings[WhiteListCount] =  WhiteListItem(
             /*_Limit == 0 ? uint256(-1) :*/
             // _Limit,
@@ -84,8 +89,8 @@ contract WhiteList is WhiteListHelper, Ownable{
     }
 
     function Register(
-        address _Subject,
         uint256 _Id,
+        address _Subject,
         uint256 _Amount
     ) external {
         if (_Id == 0) return;
@@ -99,6 +104,6 @@ contract WhiteList is WhiteListHelper, Ownable{
         );
         uint256 temp = WhitelistDB[_Id][_Subject] - _Amount;
         WhitelistDB[_Id][_Subject] = temp;
-        require(WhitelistDB[_Id][_Subject] == temp);
+        assert(WhitelistDB[_Id][_Subject] == temp);
     }
 }
