@@ -17,8 +17,7 @@ contract( 'WhiteList Contract' , async accounts => {
         // let snapshot = await timeMachine.takeSnapshot();
         // snapshotId = snapshot['result'];
     })
-
-    
+ 
     it('should create a new manual WhiteList', async () => {
         const now = Date.now() / 1000 // current timestamp in seconds
         const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
@@ -29,6 +28,11 @@ contract( 'WhiteList Contract' , async accounts => {
         assert.equal(logs._creator, fromAddress)
         assert.equal(logs._contract, contractAddress)
         assert.equal(logs._changeUntil, timestamp)
+    })
+
+    it('isReady is false before adding the first address', async () => {
+        const isReady = await instance.isWhiteListReady(id)
+        assert.isFalse(isReady)
     })
 
     it('reverts when value is less than WhiteListCost', async () => {
@@ -53,6 +57,11 @@ contract( 'WhiteList Contract' , async accounts => {
         assert.equal(result4, 400)
         const result5 = await instance.check(id, accounts[5])
         assert.equal(result5, 500)
+    })
+
+    it('isReady is true after adding the first address', async () => {
+        const isReady = await instance.isWhiteListReady(id)
+        assert.isTrue(isReady)
     })
 
     it('reverts when array length of users and amounts is not equal', async () => {

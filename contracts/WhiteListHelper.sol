@@ -33,6 +33,7 @@ contract WhiteListHelper{
         //uint256 SignUpPrice;
         address Contract;
         // mapping(address => uint256) WhiteListDB;
+        bool isReady; // defualt false | true after first address is added
     }
 
     mapping(uint256 => mapping(address => uint256)) public WhitelistDB;
@@ -46,6 +47,10 @@ contract WhiteListHelper{
 
     function _RemoveAddress(uint256 _Id, address user) internal {
         WhitelistDB[_Id][user] = 0;
+    }
+
+    function isWhiteListReady(uint256 _Id) external view returns(bool){
+        return WhitelistSettings[_Id].isReady;
     }
 
     //View function to check if address is whitelisted
