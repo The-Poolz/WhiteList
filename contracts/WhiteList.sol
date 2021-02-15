@@ -72,6 +72,7 @@ contract WhiteList is WhiteListHelper, Ownable{
         isBelowUserLimit(_Users.length)
     {
         require(_Users.length == _Amount.length, "Number of users should be same as the amount length");
+        require(_Users.length > 0,"Need something...");
         if(!WhitelistSettings[_Id].isReady){
             WhitelistSettings[_Id].isReady = true;
         }
