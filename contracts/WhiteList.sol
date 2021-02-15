@@ -37,7 +37,8 @@ contract WhiteList is WhiteListHelper, Ownable{
             // _Limit,
             msg.sender,
             _ChangeUntil,
-            _Contract
+            _Contract,
+            false
         );
         uint256 temp = WhiteListCount;
         WhiteListCount++;
@@ -71,6 +72,9 @@ contract WhiteList is WhiteListHelper, Ownable{
         isBelowUserLimit(_Users.length)
     {
         require(_Users.length == _Amount.length, "Number of users should be same as the amount length");
+        if(!WhitelistSettings[_Id].isReady){
+            WhitelistSettings[_Id].isReady = true;
+        }
         for (uint256 index = 0; index < _Users.length; index++) {
             _AddAddress(_Id, _Users[index], _Amount[index]);
         }
