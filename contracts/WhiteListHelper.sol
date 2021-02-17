@@ -53,8 +53,8 @@ contract WhiteListHelper{
         return WhitelistSettings[_Id].isReady;
     }
 
-    //View function to check if address is whitelisted
-    function check(uint256 _id, address _user) external view returns(uint){
+    //View function to Check if address is whitelisted
+    function Check(address _user, uint256 _id) external view returns(uint){
         if (_id == 0) return uint256(-1);
         return WhitelistDB[_id][_user];
     }
