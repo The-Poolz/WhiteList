@@ -47,15 +47,15 @@ contract( 'WhiteList Contract' , async accounts => {
         const accountsArray = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
         const amountArray = [100, 200, 300, 400, 500]
         await instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress})
-        const result1 = await instance.check(id, accounts[1])
+        const result1 = await instance.Check(accounts[1], id)
         assert.equal(result1, 100)
-        const result2 = await instance.check(id, accounts[2])
+        const result2 = await instance.Check(accounts[2], id)
         assert.equal(result2, 200)
-        const result3 = await instance.check(id, accounts[3])
+        const result3 = await instance.Check(accounts[3], id)
         assert.equal(result3, 300)
-        const result4 = await instance.check(id, accounts[4])
+        const result4 = await instance.Check(accounts[4], id)
         assert.equal(result4, 400)
-        const result5 = await instance.check(id, accounts[5])
+        const result5 = await instance.Check(accounts[5], id)
         assert.equal(result5, 500)
     })
 
@@ -92,7 +92,7 @@ contract( 'WhiteList Contract' , async accounts => {
     })
 
     it('returns uint256(-1) when id is 0', async () => {
-        const result = await instance.check(0, accounts[1])
+        const result = await instance.Check(accounts[1], 0)
         const hexValue = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         assert.equal(web3.utils.toHex(result), hexValue)
     })
@@ -100,9 +100,9 @@ contract( 'WhiteList Contract' , async accounts => {
     it('should remove the address from whitelist', async () => {
         const accountsArray = [accounts[4], accounts[5]]
         await instance.RemoveAddress(id, accountsArray, {from: fromAddress})
-        const result1 = await instance.check(id, accounts[4])
+        const result1 = await instance.Check(accounts[4], id)
         assert.equal(result1, 0)
-        const result2 = await instance.check(id, accounts[5])
+        const result2 = await instance.Check(accounts[5], id)
         assert.equal(result2, 0)
     })
 
@@ -161,23 +161,23 @@ contract( 'WhiteList Contract' , async accounts => {
 
     it('should register', async () => {
         const userAddress = accounts[1]
-        const userLimit = await instance.check(id, userAddress)
+        const userLimit = await instance.Check(userAddress, id)
         const amount = 30
         await instance.Register(id, userAddress, amount, {from: contractAddress})
-        const newUserLimit = await instance.check(id, userAddress)
+        const newUserLimit = await instance.Check(userAddress, id)
         assert.equal(newUserLimit, userLimit - amount)
     })
 
     it('register reverts when called by wrong contract', async () => {
         const userAddress = accounts[1]
-        const userLimit = await instance.check(id, userAddress)
+        const userLimit = await instance.Check(userAddress, id)
         const amount = 30
         truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: accounts[1]}))
     })
 
     it('register reverts when limit is less than amount', async () => {
         const userAddress = accounts[1]
-        const userLimit = await instance.check(id, userAddress)
+        const userLimit = await instance.Check(userAddress, id)
         const amount = userLimit + 1
         truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: contractAddress}))
     })
