@@ -94,8 +94,8 @@ contract WhiteList is WhiteListHelper, Ownable{
     }
 
     function Register(
-        uint256 _Id,
         address _Subject,
+        uint256 _Id,
         uint256 _Amount
     ) external {
         if (_Id == 0) return;
