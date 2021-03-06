@@ -163,7 +163,7 @@ contract( 'WhiteList Contract' , async accounts => {
         const userAddress = accounts[1]
         const userLimit = await instance.Check(userAddress, id)
         const amount = 30
-        await instance.Register(id, userAddress, amount, {from: contractAddress})
+        await instance.Register(userAddress, id,  amount, {from: contractAddress})
         const newUserLimit = await instance.Check(userAddress, id)
         assert.equal(newUserLimit, userLimit - amount)
     })
@@ -172,14 +172,14 @@ contract( 'WhiteList Contract' , async accounts => {
         const userAddress = accounts[1]
         const userLimit = await instance.Check(userAddress, id)
         const amount = 30
-        truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: accounts[1]}))
+        truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: accounts[1]}))
     })
 
     it('register reverts when limit is less than amount', async () => {
         const userAddress = accounts[1]
         const userLimit = await instance.Check(userAddress, id)
         const amount = userLimit + 1
-        truffleAssert.reverts(instance.Register(id, userAddress, amount, {from: contractAddress}))
+        truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: contractAddress}))
     })
 
 })
