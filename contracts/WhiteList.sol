@@ -22,6 +22,10 @@ contract WhiteList is WhiteListHelper, Ownable{
     function setMaxUsersLimit(uint256 _limit) external onlyOwner {
         MaxUsersLimit = _limit;
     }
+    
+    function WithdrawETHFee(address _to) public onlyOwner {
+        _to.transfer(address(this).balance); 
+    }
 
     function setWhiteListCost(uint256 _newCost) external onlyOwner {
         WhiteListCost = _newCost;
