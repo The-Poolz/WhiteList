@@ -182,4 +182,17 @@ contract( 'WhiteList Contract' , async accounts => {
         truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: contractAddress}))
     })
 
+    it('should run LastRoundRegister', async () => {
+        const userAddress = accounts[2]
+        await instance.LastRoundRegister(userAddress, id, {from: contractAddress})
+        const userLimit = await instance.Check(userAddress, id)
+        const hexValue = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        assert.equal(web3.utils.toHex(userLimit), hexValue)
+    })
+
+    it('should fail LastRoundRegister for twice for same address', async () => {
+        const userAddress = accounts[2]
+        truffleAssert.reverts(instance.LastRoundRegister(userAddress, id, {from: contractAddress}), 'Sorry, no alocation for Subject')
+    })
+
 })

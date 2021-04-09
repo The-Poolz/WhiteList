@@ -115,4 +115,22 @@ contract WhiteList is WhiteListHelper, Ownable{
         WhitelistDB[_Id][_Subject] = temp;
         assert(WhitelistDB[_Id][_Subject] == temp);
     }
+
+    function LastRoundRegister(
+        address _Subject,
+        uint256 _Id
+    ) external {
+        if (_Id == 0) return;
+        require(
+            msg.sender == WhitelistSettings[_Id].Contract,
+            "Only the Contract can call this"
+        );
+        require(
+            WhitelistDB[_Id][_Subject] != uint256(-1),
+            "Sorry, no alocation for Subject"
+        );
+        uint256 temp = uint256(-1);
+        WhitelistDB[_Id][_Subject] = temp;
+        assert(WhitelistDB[_Id][_Subject] == temp);
+    }
 }
