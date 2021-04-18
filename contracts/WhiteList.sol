@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.4.26;
+pragma solidity >=0.4.24 <0.7.0;
 
 import "./WhiteListHelper.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 contract WhiteList is WhiteListHelper, Ownable{
     constructor() public {
@@ -23,7 +23,7 @@ contract WhiteList is WhiteListHelper, Ownable{
         MaxUsersLimit = _limit;
     }
     
-    function WithdrawETHFee(address _to) public onlyOwner {
+    function WithdrawETHFee(address payable _to) public onlyOwner {
         _to.transfer(address(this).balance); 
     }
 
@@ -68,7 +68,7 @@ contract WhiteList is WhiteListHelper, Ownable{
         WhitelistSettings[_Id].Contract = _NewContract;
     }
 
-    function AddAddress(uint256 _Id, address[] _Users, uint256[] _Amount)
+    function AddAddress(uint256 _Id, address[] calldata _Users, uint256[] calldata _Amount)
         public
         OnlyCreator(_Id)
         TimeRemaining(_Id)
@@ -85,7 +85,7 @@ contract WhiteList is WhiteListHelper, Ownable{
         }
     }
 
-    function RemoveAddress(uint256 _Id, address[] _Users)
+    function RemoveAddress(uint256 _Id, address[] calldata _Users)
         public
         OnlyCreator(_Id)
         TimeRemaining(_Id)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.4.26;
+pragma solidity >=0.4.24 <0.7.0;
 
 contract WhiteListHelper{
     event NewWhiteList(uint _WhiteListCount, address _creator, address _contract, uint _changeUntil);
