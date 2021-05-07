@@ -9,6 +9,8 @@ node_modules
 coverage
 coverage.json
 
+secret.js
+
 # production
 build
 build_webpack
