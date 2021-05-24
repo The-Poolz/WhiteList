@@ -52,27 +52,27 @@ contract WhiteList is WhiteListHelper, Ownable{
 
     function ChangeCreator(uint256 _Id, address _NewCreator)
         external
+        ValidateId(_Id)
         OnlyCreator(_Id)
         TimeRemaining(_Id)
-        ValidateId(_Id)
     {
         WhitelistSettings[_Id].Creator = _NewCreator;
     }
 
     function ChangeContract(uint256 _Id, address _NewContract)
         external
+        ValidateId(_Id)
         OnlyCreator(_Id)
         TimeRemaining(_Id)
-        ValidateId(_Id)
     {
         WhitelistSettings[_Id].Contract = _NewContract;
     }
 
     function AddAddress(uint256 _Id, address[] calldata _Users, uint256[] calldata _Amount)
         public
+        ValidateId(_Id)
         OnlyCreator(_Id)
         TimeRemaining(_Id)
-        ValidateId(_Id)
         isBelowUserLimit(_Users.length)
     {
         require(_Users.length == _Amount.length, "Number of users should be same as the amount length");
