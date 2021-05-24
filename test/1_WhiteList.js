@@ -40,7 +40,7 @@ contract( 'WhiteList Contract' , async accounts => {
         const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
         
         const value = whiteListCost
-        truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}))
+        await truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}), 'ether not enough')
     })
 
     it('should add addresses to whitelist', async () => {
@@ -67,19 +67,19 @@ contract( 'WhiteList Contract' , async accounts => {
     it('reverts when array length of users and amounts is not equal', async () => {
         const accountsArray = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]] // array size - 5
         const amountArray = [100, 200, 300] // array size - 3
-        truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}))
+        await truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}), 'Number of users should be same as the amount length')
     })
 
     it('reverts when called by non creator address', async () => {
         const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
         const amountArray = [100, 200, 300]
-        truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: accounts[1]}))
+        await truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: accounts[1]}), 'Only creator can access')
     })
 
     it('reverts when called invalid ID', async () => {
         const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
         const amountArray = [100, 200, 300]
-        truffleAssert.reverts(instance.AddAddress(100, accountsArray, amountArray, {from: fromAddress}))
+        await truffleAssert.reverts(instance.AddAddress(100, accountsArray, amountArray, {from: fromAddress}), 'Wrong ID')
     })
 
     it('revert after time is expired', async () => {
@@ -87,7 +87,7 @@ contract( 'WhiteList Contract' , async accounts => {
         const accountsArray = [accounts[1], accounts[2], accounts[3]] // array size - 5
         const amountArray = [100, 200, 300]
         // await instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress})
-        truffleAssert.reverts(instance.AddAddress(100, accountsArray, amountArray, {from: fromAddress}))
+        await truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}), 'Time for edit is finished')
         await timeMachine.advanceTimeAndBlock(-3601);
     })
 
@@ -118,7 +118,7 @@ contract( 'WhiteList Contract' , async accounts => {
         for(let i=0; i<20; i++){
             amountArray.push(100)
         }
-        truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}))        
+        await truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}), 'Maximum User Limit exceeded')        
     })
 
     it(`should not allow to remove users more than ${userLimit}`, async () => {
@@ -128,7 +128,7 @@ contract( 'WhiteList Contract' , async accounts => {
         for(let i=0; i<20; i++){
             amountArray.push(100)
         }
-        truffleAssert.reverts(instance.RemoveAddress(id, accountsArray, {from: fromAddress}))        
+        await truffleAssert.reverts(instance.RemoveAddress(id, accountsArray, {from: fromAddress}), 'Maximum User Limit exceeded')        
     })
 
     it('update user limit', async () => {
@@ -172,14 +172,14 @@ contract( 'WhiteList Contract' , async accounts => {
         const userAddress = accounts[1]
         const userLimit = await instance.Check(userAddress, id)
         const amount = 30
-        truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: accounts[1]}))
+        await truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: accounts[1]}), 'Only the Contract can call this')
     })
 
     it('register reverts when limit is less than amount', async () => {
         const userAddress = accounts[1]
         const userLimit = await instance.Check(userAddress, id)
         const amount = userLimit + 1
-        truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: contractAddress}))
+        await truffleAssert.reverts(instance.Register(userAddress, id,  amount, {from: contractAddress}), 'Sorry, no alocation for Subject')
     })
 
     it('should run LastRoundRegister', async () => {
@@ -192,7 +192,8 @@ contract( 'WhiteList Contract' , async accounts => {
 
     it('should fail LastRoundRegister for twice for same address', async () => {
         const userAddress = accounts[2]
-        truffleAssert.reverts(instance.LastRoundRegister(userAddress, id, {from: contractAddress}), 'Sorry, no alocation for Subject')
+        // await instance.LastRoundRegister(userAddress, id, {from: contractAddress})
+        await truffleAssert.reverts(instance.LastRoundRegister(userAddress, id, {from: contractAddress}), 'Sorry, no alocation for Subject')
     })
 
 })
