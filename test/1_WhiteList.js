@@ -103,6 +103,14 @@ contract( 'WhiteList Contract' , async accounts => {
         assert.equal(limit.toNumber(), userLimit)
     })
 
+    it('update user limit', async () => {
+        const newLimit = 15
+        await instance.setMaxUsersLimit(newLimit)
+        const result = await instance.MaxUsersLimit()
+        assert.equal(result, newLimit)
+        userLimit = result
+    })
+
     it(`should not allow to add users more than ${userLimit}`, async () => {
         // array size - 20
         const accountsArray = []
@@ -121,13 +129,6 @@ contract( 'WhiteList Contract' , async accounts => {
             accountsArray.push(accounts[i % accounts.length])
         }
         await truffleAssert.reverts(instance.RemoveAddress(id, accountsArray, {from: fromAddress}), 'Maximum User Limit exceeded')        
-    })
-
-    it('update user limit', async () => {
-        const newLimit = 15
-        await instance.setMaxUsersLimit(newLimit)
-        const result = await instance.MaxUsersLimit()
-        assert.equal(result, newLimit)
     })
 
     it('change creator address', async () => {

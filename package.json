@@ -27,7 +27,7 @@
     "truffle-plugin-verify": "^0.5.7"
   },
   "name": "poolz-whitelist",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
