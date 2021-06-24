@@ -4,8 +4,8 @@ const truffleAssert = require('truffle-assertions');
 const timeMachine = require('ganache-time-traveler');
 
 contract( 'WhiteList Contract' , async accounts => {
-    let instance, fromAddress, id, userLimit = 10
-    let whiteListCost = web3.utils.toWei('0.01', 'ether')
+    let instance, fromAddress, id, userLimit
+    let whiteListCost
     let contractAddress = accounts[9] // random address for contract
 
     before(async () => {
@@ -14,8 +14,8 @@ contract( 'WhiteList Contract' , async accounts => {
 
     beforeEach(async () => {
         instance = await WhiteList.deployed()
-        // let snapshot = await timeMachine.takeSnapshot();
-        // snapshotId = snapshot['result'];
+        whiteListCost = await instance.WhiteListCost()
+        userLimit = await instance.MaxUsersLimit()
     })
  
     it('should create a new manual WhiteList', async () => {
@@ -33,14 +33,6 @@ contract( 'WhiteList Contract' , async accounts => {
     it('isReady is false before adding the first address', async () => {
         const isReady = await instance.isWhiteListReady(id)
         assert.isFalse(isReady)
-    })
-
-    it('reverts when value is less than WhiteListCost', async () => {
-        const now = Date.now() / 1000 // current timestamp in seconds
-        const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
-        
-        const value = whiteListCost
-        await truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}), 'ether not enough')
     })
 
     it('should add addresses to whitelist', async () => {
@@ -113,20 +105,20 @@ contract( 'WhiteList Contract' , async accounts => {
 
     it(`should not allow to add users more than ${userLimit}`, async () => {
         // array size - 20
-        const accountsArray = [...accounts, ...accounts]
+        const accountsArray = []
         const amountArray = []
-        for(let i=0; i<20; i++){
-            amountArray.push(100)
+        for(let i=0; i<userLimit + 1; i++){
+            accountsArray.push(accounts[i % accounts.length])
+            amountArray.push(100 * i)
         }
         await truffleAssert.reverts(instance.AddAddress(id, accountsArray, amountArray, {from: fromAddress}), 'Maximum User Limit exceeded')        
     })
 
     it(`should not allow to remove users more than ${userLimit}`, async () => {
         // array size - 20
-        const accountsArray = [...accounts, ...accounts]
-        const amountArray = []
-        for(let i=0; i<20; i++){
-            amountArray.push(100)
+        const accountsArray = []
+        for(let i=0; i<userLimit + 1; i++){
+            accountsArray.push(accounts[i % accounts.length])
         }
         await truffleAssert.reverts(instance.RemoveAddress(id, accountsArray, {from: fromAddress}), 'Maximum User Limit exceeded')        
     })
@@ -157,6 +149,12 @@ contract( 'WhiteList Contract' , async accounts => {
         await instance.setWhiteListCost(newCost)
         const whiteListCost = await instance.WhiteListCost()
         assert.equal(web3.utils.toHex(newCost), web3.utils.toHex(whiteListCost))
+    })
+
+    it('reverts when value is less than WhiteListCost', async () => {
+        const now = Date.now() / 1000 // current timestamp in seconds
+        const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
+        await truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}), 'ether not enough')
     })
 
     it('should register', async () => {
