@@ -7,8 +7,7 @@ import "openzeppelin-solidity/contracts/access/Ownable.sol";
 contract WhiteList is WhiteListHelper, Ownable{
     constructor() public {
         WhiteListCount = 1; //0 is off
-        MaxUsersLimit = 10;
-        WhiteListCost = 0.01 ether;
+        MaxUsersLimit = 500;
     }
 
     //uint256 public SignUpCost;
