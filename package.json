@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15",
     "@truffle/compile-common": "^0.3.10",
     "@truffle/hdwallet-provider": "^1.2.1",
     "babel-polyfill": "^6.26.0",
@@ -7,6 +8,7 @@
     "babel-register": "^6.23.0",
     "big-number": "^2.0.0",
     "ethereumjs-wallet": "^1.0.1",
+    "ganache-cli": "^6.12.2",
     "ganache-time-traveler": "^1.0.15",
     "moonbeam-truffle-plugin": "^1.1.6",
     "node-fetch": ">=2.6.1",
@@ -16,14 +18,14 @@
     "web3-provider-engine": "^16.0.1"
   },
   "devDependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
     "coveralls": "^3.1.0",
     "node-fetch": ">=2.6.1",
-    "openzeppelin-solidity": "^3.4.1",
     "sol-merger": "^3.1.0",
-    "solidity-coverage": "^0.7.11",
+    "solidity-coverage": "^0.7.21",
     "truffle-plugin-verify": "^0.5.7"
   },
   "name": "poolz-whitelist",
