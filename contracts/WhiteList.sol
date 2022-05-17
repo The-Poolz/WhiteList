@@ -68,7 +68,7 @@ contract WhiteList is WhiteListHelper, Ownable{
     }
 
     function AddAddress(uint256 _Id, address[] calldata _Users, uint256[] calldata _Amount)
-        external
+        public
         ValidateId(_Id)
         OnlyCreator(_Id)
         TimeRemaining(_Id)
@@ -85,7 +85,7 @@ contract WhiteList is WhiteListHelper, Ownable{
     }
 
     function RemoveAddress(uint256 _Id, address[] calldata _Users)
-        external
+        public
         OnlyCreator(_Id)
         TimeRemaining(_Id)
         ValidateId(_Id)
