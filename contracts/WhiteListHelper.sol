@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.24 <0.7.0;
+pragma solidity ^0.8.0;
 
 contract WhiteListHelper{
     event NewWhiteList(uint _WhiteListCount, address _creator, address _contract, uint _changeUntil);
@@ -14,7 +14,7 @@ contract WhiteListHelper{
 
     modifier TimeRemaining(uint256 _Id){
         require(
-            now < WhitelistSettings[_Id].ChangeUntil,
+            block.timestamp < WhitelistSettings[_Id].ChangeUntil,
             "Time for edit is finished"
         );
         _;
@@ -49,13 +49,13 @@ contract WhiteListHelper{
         WhitelistDB[_Id][user] = 0;
     }
 
-    function isWhiteListReady(uint256 _Id) external view returns(bool){
+    function isWhiteListReady(uint256 _Id) public view returns(bool){
         return WhitelistSettings[_Id].isReady;
     }
 
     //View function to Check if address is whitelisted
-    function Check(address _user, uint256 _id) external view returns(uint){
-        if (_id == 0) return uint256(-1);
+    function Check(address _user, uint256 _id) public view returns(uint){
+        if (_id == 0) return type(uint).max;
         return WhitelistDB[_id][_user];
     }
 }

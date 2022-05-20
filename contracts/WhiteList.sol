@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.24 <0.7.0;
+pragma solidity ^0.8.0;
 
 import "./WhiteListHelper.sol";
-import "openzeppelin-solidity/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract WhiteList is WhiteListHelper, Ownable{
-    constructor() public {
+    constructor() {
         WhiteListCount = 1; //0 is off
         MaxUsersLimit = 500;
     }
@@ -36,7 +36,7 @@ contract WhiteList is WhiteListHelper, Ownable{
     ) public payable returns (uint256 Id) {
         require(msg.value >= WhiteListCost, "ether not enough");
         WhitelistSettings[WhiteListCount] =  WhiteListItem(
-            /*_Limit == 0 ? uint256(-1) :*/
+            /*_Limit == 0 ? type(uint).max :*/
             // _Limit,
             msg.sender,
             _ChangeUntil,
@@ -125,10 +125,10 @@ contract WhiteList is WhiteListHelper, Ownable{
             "Only the Contract can call this"
         );
         require(
-            WhitelistDB[_Id][_Subject] != uint256(-1),
+            WhitelistDB[_Id][_Subject] != type(uint).max,
             "Sorry, no alocation for Subject"
         );
-        uint256 temp = uint256(-1);
+        uint256 temp = type(uint).max;
         WhitelistDB[_Id][_Subject] = temp;
         assert(WhitelistDB[_Id][_Subject] == temp);
     }

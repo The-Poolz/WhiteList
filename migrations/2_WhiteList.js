@@ -1,5 +1,5 @@
-const WhiteList = artifacts.require("WhiteList");
+const WhiteList = artifacts.require("WhiteList")
 
 module.exports = function (deployer) {
-  deployer.deploy(WhiteList);
-};
+  deployer.deploy(WhiteList)
+}
