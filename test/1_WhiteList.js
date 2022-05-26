@@ -6,7 +6,7 @@ const BigNumber = require('bignumber.js');
 const constants = require('@openzeppelin/test-helpers/src/constants.js');
 
 contract( 'WhiteList Contract' , async accounts => {
-    let instance, fromAddress, id, userLimit = 500
+    let instance, fromAddress, id, userLimit = 500, timestamp
     const newLimit = 15
     let whiteListCost
     let contractAddress = accounts[9] // random address for contract
@@ -14,12 +14,12 @@ contract( 'WhiteList Contract' , async accounts => {
     before(async () => {
         fromAddress = accounts[0]
         instance = await WhiteList.deployed()
-        whiteListCost = await instance.WhiteListCost()
+        whiteListCost = await instance.Fee()
+        const now = Date.now() / 1000 // current timestamp in seconds
+        timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
     })
     
     it('should create a new manual WhiteList', async () => {
-        const now = Date.now() / 1000 // current timestamp in seconds
-        const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
         const value = whiteListCost
         const result = await instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: value})
         const logs = result.logs[0].args
@@ -145,15 +145,15 @@ contract( 'WhiteList Contract' , async accounts => {
 
     it('change WhiteListCost', async () => {
         const newCost = web3.utils.toWei('0.02', 'ether')
-        await instance.setWhiteListCost(newCost)
-        const whiteListCost = await instance.WhiteListCost()
+        await instance.SetFeeAmount(newCost)
+        const whiteListCost = await instance.Fee()
         assert.equal(web3.utils.toHex(newCost), web3.utils.toHex(whiteListCost))
     })
 
     it('reverts when value is less than WhiteListCost', async () => {
         const now = Date.now() / 1000 // current timestamp in seconds
         const timestamp = Number(now.toFixed()) + 3600 // timestamp one hour from now
-        await truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}), 'ether not enough')
+        await truffleAssert.reverts(instance.CreateManualWhiteList(timestamp, contractAddress, {from: fromAddress, value: 0}), 'Not Enough Fee Provided')
     })
 
     it('should register', async () => {
@@ -194,10 +194,12 @@ contract( 'WhiteList Contract' , async accounts => {
     })
 
     it('should withdraw ETH', async () => {
+        const fee = await instance.Fee()
+        await instance.CreateManualWhiteList(timestamp, contractAddress, {from: accounts[7], value: fee})
         const owner = await instance.owner()
         const contractBal = new BigNumber(await web3.eth.getBalance(instance.address))
         const oldBal = new BigNumber(await web3.eth.getBalance(owner))
-        const txnReceipt = await instance.WithdrawETHFee(owner, { from: owner })
+        const txnReceipt = await instance.WithdrawFee(owner, { from: owner })
         const rcpt = await web3.eth.getTransaction(txnReceipt.tx)
         const gasPrice = rcpt.gasPrice
         const actualBalance = new BigNumber((await web3.eth.getBalance(owner)))
