@@ -30,8 +30,8 @@ contract( 'WhiteList Contract' , async accounts => {
     })
 
     it('isReady is false before adding the first address', async () => {
-        const isReady = await instance.isWhiteListReady(id)
-        assert.isFalse(isReady)
+        const result = await instance.WhitelistSettings(id)
+        assert.isFalse(result.isReady)
     })
 
     it('should add addresses to whitelist', async () => {
@@ -51,8 +51,8 @@ contract( 'WhiteList Contract' , async accounts => {
     })
 
     it('isReady is true after adding the first address', async () => {
-        const isReady = await instance.isWhiteListReady(id)
-        assert.isTrue(isReady)
+        const result = await instance.WhitelistSettings(id)
+        assert.isTrue(result.isReady)
     })
 
     it('reverts when array length of users and amounts is not equal', async () => {
