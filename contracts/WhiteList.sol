@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./WhiteListHelper.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WhiteList is WhiteListHelper, Ownable{
+contract WhiteList is WhiteListHelper {
     constructor() {
         WhiteListCount = 1; //0 is off
         MaxUsersLimit = 500;
@@ -21,20 +21,12 @@ contract WhiteList is WhiteListHelper, Ownable{
     function setMaxUsersLimit(uint256 _limit) external onlyOwner {
         MaxUsersLimit = _limit;
     }
-    
-    function WithdrawETHFee(address payable _to) public onlyOwner {
-        _to.transfer(address(this).balance); 
-    }
-
-    function setWhiteListCost(uint256 _newCost) external onlyOwner {
-        WhiteListCost = _newCost;
-    }
 
     function CreateManualWhiteList(
         uint256 _ChangeUntil,
         address _Contract
     ) public payable returns (uint256 Id) {
-        require(msg.value >= WhiteListCost, "ether not enough");
+        PayFee(Fee);
         WhitelistSettings[WhiteListCount] =  WhiteListItem(
             /*_Limit == 0 ? type(uint).max :*/
             // _Limit,

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract WhiteListHelper{
+import "poolz-helper-v2/contracts/FeeBaseHelper.sol";
+
+contract WhiteListHelper is FeeBaseHelper {
     event NewWhiteList(uint _WhiteListCount, address _creator, address _contract, uint _changeUntil);
 
     modifier OnlyCreator(uint256 _Id) {
@@ -38,7 +40,6 @@ contract WhiteListHelper{
 
     mapping(uint256 => mapping(address => uint256)) public WhitelistDB;
     mapping(uint256 => WhiteListItem) public WhitelistSettings;
-    uint256 public WhiteListCost;
     uint256 public WhiteListCount;
 
     function _AddAddress(uint256 _Id, address user, uint amount) internal {
